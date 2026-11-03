@@ -17,5 +17,4 @@ projet-stt2200/
 │   └── k_NN.R
 │
 ├── description/
-        └── README.md
         └── ai-log.md
