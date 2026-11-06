@@ -1,0 +1,261 @@
+---
+title: "Analyse exploratoire"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    number-sections: true
+    code-fold: true
+execute:
+  warning: false
+  message: false
+  error : false
+---
+
+## Objectif
+
+Explorer les distributions et les liens entre les marqueurs métaboliques et le statut diabétique.
+
+## Description des données
+
+```{r}
+# Chargement des librairies
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+```{r}
+# Importation des données
+diabetes_risk <- read.csv("../data/raw/diabetes_risk.csv")
+```
+
+```{r}
+# Affichage des premières valeurs
+apercu <- glimpse(diabetes_risk)
+head(apercu)
+
+# Nombre de lignes et de colonnes du jeu de données
+dim(diabetes_risk)
+
+# Nombre de valeurs manquantes
+NA_par_variable <- colSums(is.na(diabetes_risk))
+NA_par_variable
+
+somme_NA <- sum(NA_par_variable)
+somme_NA
+
+# Catégories de risque
+table(diabetes_risk$Diabetes_Risk)
+```
+
+Le fichier `diabetes_risk.csv` contient **50 000 observations** et **41 variables** à propos des caractéristiques démographiques, de la santé, des habitudes de vie et du risque de diabète. Les mesures comprennent notamment l’IMC, le glucose, l’HbA1c, l’activité physique, l’alimentation et le tabagisme.
+
+\
+La variable `Diabetes_Risk` comporte trois catégories : **Low** (**470**), **Moderate** (**12 937**) et **High** (**36 593**).\
+Le fichier contient **19 310 valeurs manquantes**.
+
+## Analyse exploratoire et comparaison des groupes
+
+3.1 - Calculer moyenne, médiane et écart-type de l’âge, de l’IMC, de l’HbA1c et du glucose par statut (0 ou 1).
+
+```{r}
+
+diabetes_risk %>%
+  group_by(Diabetes_Risk) %>%
+  summarise(
+    across(
+      c(Age, BMI, HbA1c, Blood_Glucose),
+      list(
+        moyenne = ~ mean(.x, na.rm = TRUE),
+        mediane = ~ median(.x, na.rm = TRUE),
+        ecart_type = ~ sd(.x, na.rm = TRUE)
+      ),
+      .names = "{.col}_{.fn}" 
+    ),
+    .groups = "drop"
+  )
+```
+
+3.2 - Étudier les corrélations entre variables continues.
+
+```{r}
+# Sélectionner les variables continues à comparer
+variables_continues <- diabetes_risk %>%
+  dplyr::select(Age, BMI, HbA1c, Blood_Glucose)
+
+# Calculer la matrice de corrélations 
+matrice_correlations <- cor(
+  variables_continues,
+  use = "pairwise.complete.obs", # Les valeurs manquantes sont ignorées paire par paire
+  method = "pearson" # Méthode de Pearson
+)
+
+round(matrice_correlations, 3)
+```
+
+3.3 - Utiliser des tests appropriés (Student ou Mann–Whitney, selon les conditions) pour comparer notamment le glucose et l’HbA1c.
+
+```{r}
+# Les mesures à comparer entre les catégories de risque
+mesures <- c("Blood_Glucose", "HbA1c")
+
+# Pour chaque mesure, on va comparer les catégories de risque
+for (mesure in mesures) {
+
+  # Garder les lignes où la mesure et la catégorie sont renseignées (une limite du projet)
+  donnees_valides <- diabetes_risk[
+    !is.na(diabetes_risk[[mesure]]) &
+      !is.na(diabetes_risk$Diabetes_Risk),
+  ]
+
+  # Comparer les trois catégories avec le test de Kruskal–Wallis
+  test_global <- kruskal.test(
+    donnees_valides[[mesure]] ~ donnees_valides$Diabetes_Risk
+  )
+
+  cat("\nRésultat pour", mesure, ":\n")
+  print(test_global)
+
+  # Si une différence globale est détectée, on va comparer les catégories deux à deux (test de Wilcoxon)
+  
+  if (test_global$p.value < 0.05) {
+    comparaisons <- pairwise.wilcox.test(
+      donnees_valides[[mesure]],
+      donnees_valides$Diabetes_Risk,
+      p.adjust.method = "holm"  # Sans correction, multiplier les tests augmente le risque de trouver une différence significative par hasard.
+    )
+
+    cat("Comparaisons deux à deux (valeurs p corrigées) :\n")
+    print(comparaisons)
+  }
+}
+```
+
+Le test de Kruskal–Wallis ne détecte pas de différence significative du glucose entre les catégories `Low`, `Moderate` et `High` (p-value = 0,4876). Dans cet échantillon, les niveaux de glucose ne varient donc pas selon la catégorie de risque.
+
+Pour l’HbA1c, le test révèle une différence entre les catégories (p-value \< 2,2 × 10⁻¹⁶). Les comparaisons pairées corrigées par la méthode de Holm indiquent que les trois paires de catégories diffèrent significativement. Alors, pour chaque paire comparée (`Low`–`Moderate`, `Low`–`High` et `Moderate`–`High`) le test de Mann–Whitney trouve une différence statistiquement significative dans la distribution de l’HbA1c. Cependant, le test ne précise pas quelle catégorie a les valeurs les plus élevées. Pour le voir, il faut comparer les médianes. Selon les boîtes à moustaches (voir section 3.5), l’HbA1c semble plus élevée dans la catégorie `High` que dans `Moderate` et plus élevée dans `Moderate` que dans `Low`.
+
+3.4 - Matrice de corrélation (carte thermique).
+
+```{r}
+
+# Arrondir les corrélations à cinq décimales
+correlations_arrondies <- round(matrice_correlations, 3)
+
+# Ignorer les valeurs de la diagonale, qui valent toujours 1
+diag(correlations_arrondies) <- NA
+
+# Trouver la paire de variables la plus corrélée
+position <- which(
+  abs(correlations_arrondies) == max(abs(correlations_arrondies), na.rm = TRUE),
+  arr.ind = TRUE # renvoyer les positions sous forme de ligne et de colonne dans la matrice
+)[1, ] # garde la première position trouvée et ses deux coordonnées
+
+variable_1 <- rownames(correlations_arrondies)[position[1]]
+variable_2 <- colnames(correlations_arrondies)[position[2]]
+correlation <- correlations_arrondies[position[1], position[2]]
+
+# Afficher le résultat sous forme de phrase
+cat(
+  "La corrélation la plus élevée en valeur absolue est entre",
+  variable_1, "et", variable_2,
+  ": r =", format(correlation, nsmall = 3), "\n"
+)
+
+```
+
+```{r}
+
+# Préparer la matrice 
+donnees_carte <- as.data.frame(as.table(matrice_correlations))
+names(donnees_carte) <- c("variable_1", "variable_2", "correlation")
+
+
+# Carte thermique
+ggplot(donnees_carte, aes(x = variable_1, y = variable_2, fill = correlation)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = round(correlation, 3))) +
+  scale_fill_gradient2(
+    low = "blue",
+    mid = "white",
+    high = "red",
+    midpoint = 0,
+    limits = c(-1, 1)
+  ) +
+  labs(
+    title = "Corrélations entre les variables",
+    x = NULL,
+    y = NULL,
+    fill = "Corrélation"
+  ) +
+  theme_minimal()
+
+```
+
+La carte thermique montre que l’âge, l’IMC, l’HbA1c et le glucose sanguin ont des corrélations linéaires presque nulles entre eux. Les cases colorées sur la diagonale correspondent à chaque variable comparée à elle-même (elles valent toujours 1 et ne représentent pas un lien entre deux variables différentes).
+
+3.5 - Boîtes à moustaches du glucose et de l’HbA1c selon le statut.
+
+```{r}
+
+# Mettre le glucose et l'HbA1c dans une seule colonne pour les tracer ensemble
+diabetes_HbA1c_glucose <- diabetes_risk %>%
+  select(Diabetes_Risk, Blood_Glucose, HbA1c) %>%
+  pivot_longer(
+    cols = c(Blood_Glucose, HbA1c),
+    names_to = "Mesure",
+    values_to = "Valeur"
+  )
+
+# Boîte à moustaches pour chaque mesure et catégorie de risque
+ggplot(diabetes_HbA1c_glucose, aes(x = Diabetes_Risk, y = Valeur, fill = Diabetes_Risk)) +
+  geom_boxplot(na.rm = TRUE) +
+  facet_wrap(~ Mesure, scales = "free_y") +
+  labs(
+    title = "Glucose et HbA1c selon la catégorie de risque",
+    x = "Catégorie de risque de diabète",
+    y = "Valeur mesurée",
+    fill = "Catégorie de risque"
+  ) +
+  theme_minimal()
+```
+
+La médiane de l’HbA1c augmente nettement avec la catégorie de risque. En effet, environ 5.2 (`Low`), 6.8 (`Moderate`) et 8.9 (`High`). En revanche, les médianes du glucose sont très proches. On a environ 155.5 (`Low`), 159.3 (`Moderate`) et 160.2 (`High`) et les boîtes se chevauchent fortement.
+
+```{r}
+# Mettre l'âge et l'IMC dans une seule colonne pour les tracer ensemble
+diabetes_Age_BMI <- diabetes_risk %>%
+  select(Diabetes_Risk, Age, BMI) %>%
+  pivot_longer(
+    cols = c(Age, BMI),
+    names_to = "Mesure",
+    values_to = "Valeur"
+  )
+
+# Boîte à moustaches pour chaque mesure et catégorie de risque
+ggplot(diabetes_Age_BMI, aes(x = Diabetes_Risk, y = Valeur, fill = Diabetes_Risk)) +
+  geom_boxplot(na.rm = TRUE) +
+  facet_wrap(~ Mesure, scales = "free_y") +
+  labs(
+    title = "Âge et IMC selon la catégorie de risque",
+    x = "Catégorie de risque de diabète",
+    y = "Valeur mesurée",
+    fill = "Catégorie de risque"
+  ) +
+  theme_minimal()
+```
+
+Les médianes sont plus élevées dans la catégorie `High`. En effet, l’âge passe d’environ 35 à 58 ans et l’IMC de 23,4 à 31,4. Les distributions se chevauchent toutefois, donc ces variables ne distinguent pas parfaitement les catégories. N.B. que les catégories représentent un niveau de risque, pas nécessairement un diagnostic de diabète.
+
+## Constats descriptifs
+
+4.1 - Résumer les principaux constats.
+
+### 4.1 — Principaux constats
+
+Les niveaux de glucose ne diffèrent pas significativement entre les catégories `Low`, `Moderate` et `High` (p-value = 0,4876). En revanche, l’HbA1c varie significativement entre les trois catégories (p-value \< 0,001), et les comparaisons deux à deux indiquent une différence pour chaque paire. Les boîtes à moustaches montrent que les médianes d’HbA1c augmentent de `Low` à `Moderate`, puis à `High`. Ainsi, dans notre jeu de données, l’HbA1c distingue davantage les catégories de risque que le glucose. Cependant, les différences statistiques ne signifient pas nécessairement que les écarts sont grands ou qu’ils démontrent un lien causal.
+
+## Comparaison des groupes selon le statut diabétique et principaux écarts observés entre les groupes
+
+Les boîtes à moustaches montrent que l’âge médian et l’IMC médian sont plus élevés dans la catégorie `High` (58 ans et 31.4) que dans `Moderate` (43 ans et 26.5) et `Low` (35 ans et 23.4). L’HbA1c médiane augmente aussi selon le niveau de risque : 5.2 (`Low`), 6.8 (`Moderate`) et 8.9 (`High`). En revanche, les médianes du glucose sont proches dans les trois catégories, autour de 155 à 160. Ces constats décrivent les écarts observés.

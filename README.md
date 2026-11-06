@@ -1,22 +1,28 @@
-# Projet d’analyse de données : profils métaboliques et diabète
+# Projet d’analyse de données : profils métaboliques et prédiction du diabète
 
 ## Présentation du projet
 
-Ce projet utilise le **Diabetes Prediction Dataset** de [Kaggle](https://www.kaggle.com/datasets/mobeenfatimah/diabetes-risk-prediction-dataset-50k-patients) pour étudier les profils métaboliques associés au diabète et classifier le statut diabétique (`Diabetes_Risk`, `Low`, `Moderate` et `High`) à partir de variables démographiques et cliniques. Le jeu de données comprend notamment l’âge, l’IMC (`BMI`), le taux d’HbA1c (`HbA1c`), le glucose sanguin (`Blood_Glucose`), ainsi que des indicateurs comme l’hypertension (`Hypertension`) et les maladies cardiaques (`Heart_Disease`).
+Ce projet utilise le **Diabetes Prediction Dataset** de [Kaggle](https://www.kaggle.com/datasets/mobeenfatimah/diabetes-risk-prediction-dataset-50k-patients) pour étudier les profils métaboliques associés au diabète et classifier le statut diabétique (`Diabetes_Risk`, `Low`, `Moderate` et `High`) à partir de variables démographiques et cliniques. Le jeu de données comprend notamment l’âge (`Age`), l’IMC (`BMI`), le taux d’HbA1c (`HbA1c`), le glucose sanguin (`Blood_Glucose`), ainsi que des indicateurs comme l’hypertension (`Hypertension`) et les maladies cardiaques (`Heart_Disease`).
 
-Le jeu de données est placé dans `data/raw/diabetes_risk_raw.csv`. Les analyses et scripts du projet sont organisés ainsi :
+Le jeu de données est placé dans `data/raw/diabetes_risk.csv`. Les analyses et scripts du projet sont organisés ainsi :
 
 ``` text
 projet-stt2200/
 ├── data/
-│   ├── raw/
-│   │   └── diabetes_risk_raw.csv
+│   └── raw/
+│   │   └── diabetes_risk.csv
+|   |  
 │   └── processed/
+|
 ├── scripts/
-│   ├── EDA.R
-│   ├── ACP.R
-│   ├── k_means.R
+│   └── EDA.R
+│   └── ACP.R
+│   └── k_means.R
 │   └── k_NN.R
+|
+├── rapports/
+|   └── EDA.qmd
+|
 └── description/
     └── ai-log.md
 ```
@@ -25,7 +31,7 @@ projet-stt2200/
 
 > Dans quelle mesure la combinaison des biomarqueurs glycémiques (HbA1c et glucose), des indicateurs morphologiques (IMC) et des antécédents cliniques permet-elle de structurer les profils métaboliques de la population et de classifier le statut diabétique ?
 
-## Objectifs et hypothèse
+## Objectifs et hypothèses
 
 1.  Explorer les distributions et les liens entre les marqueurs métaboliques et le statut diabétique.
 2.  Réduire la dimension des variables quantitatives à l’aide d’une analyse en composantes principales (ACP) afin de dégager les principaux axes de variation des profils.
