@@ -2,15 +2,15 @@
 
 ## Présentation du projet
 
-Ce projet utilise le **Diabetes Prediction Dataset** de Kaggle pour étudier les profils métaboliques associés au diabète et classifier le statut diabétique (`Diabetes_Risk`, `Low`, `Moderate` et `High`) à partir de variables démographiques et cliniques. Le jeu de données comprend notamment l’âge, l’IMC (`BMI`), le taux d’HbA1c (`HbA1c`), le glucose sanguin (`Blood_Glucose`), ainsi que des indicateurs comme l’hypertension (`Hypertension`) et les maladies cardiaques (`Heart_Disease`).
+Ce projet utilise le **Diabetes Prediction Dataset** de [Kaggle](https://www.kaggle.com/datasets/mobeenfatimah/diabetes-risk-prediction-dataset-50k-patients) pour étudier les profils métaboliques associés au diabète et classifier le statut diabétique (`Diabetes_Risk`, `Low`, `Moderate` et `High`) à partir de variables démographiques et cliniques. Le jeu de données comprend notamment l’âge, l’IMC (`BMI`), le taux d’HbA1c (`HbA1c`), le glucose sanguin (`Blood_Glucose`), ainsi que des indicateurs comme l’hypertension (`Hypertension`) et les maladies cardiaques (`Heart_Disease`).
 
-Le jeu de données est placé dans `data/raw/diabetes_risk_prediction.csv`. Les analyses et scripts du projet sont organisés ainsi :
+Le jeu de données est placé dans `data/raw/diabetes_risk_raw.csv`. Les analyses et scripts du projet sont organisés ainsi :
 
 ``` text
 projet-stt2200/
 ├── data/
 │   ├── raw/
-│   │   └── diabetes_risk_prediction.csv
+│   │   └── diabetes_risk_raw.csv
 │   └── processed/
 ├── scripts/
 │   ├── EDA.R
@@ -42,7 +42,7 @@ projet-stt2200/
 | Membre                                             | Responsabilité                                                          | Démarche                                                                                                                                                                                                                                                                                                                                                       | Visuels et résultats à présenter                                                                                                            |
 |------------------|------------------|------------------|------------------|
 | **Ninve — Analyse exploratoire (EDA)**             | Décrire les données et comparer les groupes selon le statut diabétique. | Calculer moyenne, médiane et écart-type de l’âge, de l’IMC, de l’HbA1c et du glucose par statut (0 ou 1). Étudier les corrélations entre variables continues. Utiliser des tests appropriés (Student ou Mann–Whitney, selon les conditions) pour comparer notamment le glucose et l’HbA1c.                                                                     | Matrice de corrélation (carte thermique) et boîtes à moustaches du glucose et de l’HbA1c selon le statut. Résumer les principaux constats.  |
-| **Ève — Analyse en composantes principales (ACP)** | Étudier les principaux axes de variation des profils métaboliques.      | Centrer et réduire les variables quantitatives (`age`, `bmi`, `HbA1c_level`, `blood_glucose_level`). Examiner l’éboulis des valeurs propres et interpréter les axes à partir des contributions et corrélations des variables.                                                                                                                                  | Éboulis des valeurs propres, cercle des corrélations et projection des individus sur le plan factoriel, colorée selon le statut diabétique. |
+| **Ève — Analyse en composantes principales (ACP)** | Étudier les principaux axes de variation des profils métaboliques.      | Centrer et réduire les variables quantitatives (`Age`, `BMI`, `HbA1c`, `Blood_Glucose`). Examiner l’éboulis des valeurs propres et interpréter les axes à partir des contributions et corrélations des variables.                                                                                                                                              | Éboulis des valeurs propres, cercle des corrélations et projection des individus sur le plan factoriel, colorée selon le statut diabétique. |
 | **Albert — k-moyennes (k-means)**                  | Segmenter et décrire des groupes de profils métaboliques.               | Standardiser les variables continues retenues. Choisir le nombre de groupes en examinant la méthode du coude et le coefficient de silhouette. Exécuter l’algorithme avec plusieurs initialisations (par exemple `nstart = 25`), puis caractériser chaque groupe.                                                                                               | Graphique de choix du nombre de groupes et projection des groupes sur le plan de l’ACP. Présenter le profil de chaque groupe.               |
 | **Aymeric — k plus proches voisins (k-NN)**        | Construire et évaluer un modèle de classification du statut diabétique. | Séparer les données en ensembles d’entraînement et de test (par exemple 80/20), en tenant compte du déséquilibre possible des classes. Normaliser les variables sans fuite d’information depuis l’ensemble test. Choisir le paramètre `k` par validation croisée et évaluer les performances, en portant attention à la sensibilité pour la classe diabétique. | Erreur selon `k`, matrice de confusion et courbe ROC avec aire sous la courbe (AUC), accompagnées des métriques de performance pertinentes. |
 
