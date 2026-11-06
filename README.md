@@ -7,8 +7,9 @@ Analyser les statistiques des patients (selon l’âge, le sexe, la pression art
 projet-stt2200/
 │
 ├── data/
+|   └── processed/
 │   └── raw/
-│        └── heart.csv
+│        └── diabetes_risk_prediction.csv
 │
 ├── scripts/
 │   └── EDA.R
