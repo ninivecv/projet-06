@@ -10,7 +10,7 @@ Le fichier de données se trouve dans `data/raw/diabetes_risk.csv`. La variable 
 
 ## Problématique
 
-> Les groupes obtenus avec l’IMC, l’HbA1c et le glucose ressemblent-ils aux groupes obtenus avec le tabagisme, l’activité physique et la qualité de l’alimentation ?
+Les groupes obtenus avec l’IMC, l’HbA1c et le glucose ressemblent-ils aux groupes obtenus avec le tabagisme, l’activité physique et la qualité de l’alimentation ?
 
 ## Objectif
 
