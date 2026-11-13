@@ -24,7 +24,7 @@ Les groupes formés à partir des habitudes de vie ne seront pas entièrement le
 
 Avant l’analyse, nous vérifierons les valeurs manquantes et expliquerons comment nous les traiterons. Nous standardiserons les variables cliniques et préciserons comment les habitudes de vie sont codées.
 
-Nous créerons les deux segmentations à partir des mêmes personnes, puis nous comparerons les groupes avec un tableau croisé et l’indice de Rand ajusté (ARI). Un ARI proche de 1 signifie que les regroupements se ressemblent beaucoup et proche de 0 signifie qu’ils ne se ressemblent pas plus que prévu par hasard. Les numéros des groupes servent seulement à les distinguer.
+Nous créerons les deux segmentations à partir des mêmes personnes, puis nous comparerons les groupes avec un tableau croisé et l’indice de Rand ajusté (ARI). Un ARI proche de 1 indique que les regroupements sont très similaires, tandis qu’un ARI proche de 0 suggère qu’ils ne présentent aucune similitude plus grande que ce que l’on pourrait attendre par hasard. Les numéros des groupes servent seulement à les distinguer.
 
 ## Répartition des tâches
 
@@ -42,3 +42,8 @@ Nous créerons les deux segmentations à partir des mêmes personnes, puis nous 
 3.  Appliquer les k-moyennes aux mêmes personnes pour chacun des ensembles.
 4.  Comparer les groupes avec un tableau croisé et l’ARI. Utiliser les ACP pour visualiser les profils.
 5.  Présenter les résultats et les limites, notamment celles du codage et le fait que les groupes sont des profils statistiques, pas des diagnostics médicaux.
+
+## Sources
+
+-   **Notes de cours du professeur** : notes sur l’EDA (`Notes de cours/EDA.pdf`), l’ACP (`Notes de cours/ACP.pdf`) et les k-moyennes (`Notes de cours/k-means.pdf`).
+-   **Jeu de données** : *Diabetes Risk Prediction Dataset — 50K Patients*, disponible sur [Kaggle](https://www.kaggle.com/datasets/mobeenfatimah/diabetes-risk-prediction-dataset-50k-patients) et utilisé dans le projet sous le nom `data/raw/diabetes_risk.csv`.
