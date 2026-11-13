@@ -9,6 +9,7 @@ Gemini a été utilisé pour proposer une répartition des tâches entre les mem
 Antidote, un outil d’aide à la rédaction intégré au logiciel utilisé par l’équipe, a servi à reformuler certaines phrases afin d’en améliorer la clarté et la formulation.
 
 
-## Usage 3 - Structure du code pour le test de Kruskal–Wallis (Analyse exploratoire)
+## Usage 3 - Structure partielle du code pour les graphiques de l'analyse exploratoire
 
-L’IA a été utilisé pour structurer le code du test de Kruskal–Wallis afin de comparer les niveaux de glucose et d’HbA1c entre les catégories de risque. L'IA nous a également proposé des comparaisons pairées de Mann–Whitney avec correction de Holm (méthode qui ajuste les valeurs p pour limiter le risque de faux positifs (conclure qu’il existe une différence entre deux catégories alors qu’en réalité, la différence observée est due au hasard) lorsqu’on effectue plusieurs comparaisons).
+L’IA a aidé à structurer le code R pour vérifier les variables, résumer les mesures cliniques et les habitudes de vie ainsi que de produire les tableaux et graphiques de l’analyse exploratoire.
+

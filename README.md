@@ -29,7 +29,7 @@ Nous créerons les deux segmentations à partir des mêmes personnes, puis nous 
 ## Répartition des tâches
 
 | Membre                                                 | Responsabilité                                             | Tâches                                                                                                                                                                                |
-|------------------------|------------------------|------------------------|
+|----------------|----------------|-----------------------------------------|
 | **Ninive : Analyse exploratoire (EDA)**                | Décrire les données et les six variables retenues.         | Vérifier les valeurs manquantes et les catégories, résumer les variables cliniques et les habitudes de vie avec des tableaux et des graphiques simples.                               |
 | **Albert : k-moyennes (k-means)**                      | Réaliser et comparer les segmentations.                    | Documenter la préparation des variables, appliquer les k-moyennes aux deux groupes de variables, puis comparer les résultats avec un tableau croisé et l’indice de Rand ajusté (ARI). |
 | **Ève : Affiche**                                      | Préparer la présentation visuelle du projet.               | Organiser la problématique, l’objectif, l’hypothèse, les méthodes, les principaux résultats et la conclusion sur l’affiche.                                                           |
