@@ -8,7 +8,7 @@ library(ggplot2)
 library(gridExtra)
 
 
-# On veut enregistrer un tableau comme image PNG dans le dossier resultats (IA)
+# On veut enregistrer un tableau comme image PNG dans le dossier resultats 
 
 enregistrer_tableau_png <- function(tableau, nom_fichier) {
   tableau <- as.data.frame(tableau)
@@ -65,7 +65,7 @@ variables_habitudes <- c(
 variable_groupe <- "Diabetes_Risk"
 variables_attendues <- c(variables_cliniques, variables_habitudes, variable_groupe)
 
-# Arrêter le script avec un message explicite si un nom de colonne est incorrect (IA)
+# Arrêter le script avec un message explicite si un nom de colonne est incorrect 
 colonnes_absentes <- setdiff(variables_attendues, names(diabetes_risk))
 if (length(colonnes_absentes) > 0) {
   stop("Colonnes absentes du fichier : ", paste(colonnes_absentes, collapse = ", "))
@@ -129,7 +129,7 @@ lapply(variables_habitudes, function(variable) {
 })
 
 
-#  Résumer les trois variables cliniques (IA)
+#  Résumer les trois variables cliniques 
 
 # Calculer le nombre de valeurs disponibles, la moyenne, la médiane
 # et l'écart-type de chaque mesure clinique par catégorie de risque 
@@ -152,7 +152,7 @@ resume_clinique <- donnees_eda %>%
 resume_clinique
 
 
-# Résumer les habitudes de vie dans un tableau (IA)
+# Résumer les habitudes de vie dans un tableau 
 
 # Mettre les trois habitudes dans une même colonne pour compter facilement
 # chaque réponse selon l'habitude et la catégorie de risque 
@@ -210,7 +210,7 @@ graphique_clinique <- ggplot(
 graphique_clinique
 
 
-# Graphique des habitudes de vie (IA)
+# Graphique des habitudes de vie 
 
 # Calculer la proportion de chaque réponse dans chaque catégorie de risque 
 # Les proportions facilitent la comparaison lorsque les groupes ont des effectifs différents
