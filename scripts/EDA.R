@@ -206,7 +206,8 @@ graphique_clinique <- ggplot(
     y = "Valeur mesurée",
     fill = "Catégorie de risque"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  scale_fill_manual(values = suite_vert)
 graphique_clinique
 
 
