@@ -198,8 +198,6 @@ graphique_clinique <- ggplot(
       HbA1c = "HbA1c"
     ))
   ) +
-
-
   labs(
     title = "Variables cliniques selon la catégorie de risque",
     x = "Catégorie de risque",
@@ -207,7 +205,15 @@ graphique_clinique <- ggplot(
     fill = "Catégorie de risque"
   ) +
   theme_minimal() +
-  scale_fill_manual(values = suite_vert)
+  scale_fill_manual(values = suite_vert) +
+  stat_summary(
+    fun = mean,
+    geom = "point",
+    shape = 23,
+    size = 3,
+    fill = "white",
+    color = "black"
+  ) + guides (fill = "none")
 graphique_clinique
 
 
