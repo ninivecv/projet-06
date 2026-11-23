@@ -1,0 +1,6 @@
+"Arbre","Critere_VC","cp_retenu","Feuilles","Profondeur","Erreur_VC_pct","Exactitude_test_pct","Exactitude_equilibree_pct","Rappel_Low_pct","Rappel_Moderate_pct","Rappel_High_pct","Variable_principale"
+"Médicales","standard",5e-04,35,10,24.33,76.05,40.51,0,27.23,94.3,"HbA1c"
+"Habitudes","standard",0.1,1,0,26.82,73.18,33.33,0,0,100,"aucune"
+"Médicales rééq.","équilibrée",0.1,2,1,42.36,62.62,58.67,91.6,0,84.4,"HbA1c"
+"Habitudes rééq.","équilibrée",0.02,3,2,54.81,44.77,46.52,79.39,0,60.16,"Alim"
+"Référence","—",NA,1,0,NA,73.18,33.33,0,0,100,"toujours High"
