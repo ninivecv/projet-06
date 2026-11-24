@@ -111,7 +111,7 @@ barplot(table(nb$Best.nc[1, ]),
 
 ## Application de la méthode des k-moyennes avec k_souhaite -
 # *k = 2 et k = 6*
-km <- kmeans(z, centers = k_souhaite, nstart = 50, iter.max = 100,
+km <- kmeans(z, centers = k_souhaite, nstart = 50, iter.max = 1000,
              algorithm = "Lloyd")
 
 ## Numéroter les groupes selon la moyenne du 1er facteur -
