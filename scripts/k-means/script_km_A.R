@@ -1,6 +1,6 @@
 ############################################################
 ##  ANALYSE A K-MOYENNES — Adapté de codes/k_means.R (cours
-##  STT-2000, Palmer Penguins)
+##  STT-2200, Palmer Penguins)
 ############################################################
 
 ## ---------- 0. PACKAGES (installer une seule fois) ----------
