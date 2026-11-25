@@ -10,15 +10,15 @@ Le fichier de données se trouve dans `data/raw/diabetes_risk.csv`. La variable 
 
 ## Problématique
 
-Les groupes obtenus avec l’IMC, l’HbA1c et le glucose ressemblent-ils aux groupes obtenus avec le tabagisme, l’activité physique et la qualité de l’alimentation ?
+Les groupes formés à partir des habitudes de vie correspondent-ils aux catégories de risque observées aussi bien que les groupes formés à partir des variables cliniques?
 
 ## Objectif
 
-Comparer les groupes formés par les k-moyennes à partir des trois variables cliniques avec ceux formés à partir des trois variables d’habitudes de vie, puis décrire leurs ressemblances et leurs différences à l’aide de l’ACP et de l’analyse exploratoire.
+Comparer les groupes formés par les k-moyennes à partir des trois variables cliniques avec ceux formés à partir des trois variables d’habitudes de vie, puis décrire leurs ressemblances et leurs différences à l’aide des arbres de classification et de régression (CART) ainsi que de l’analyse exploratoire (EDA).
 
 ## Hypothèse
 
-Les groupes formés à partir des habitudes de vie ne seront pas entièrement les mêmes que ceux formés à partir des variables cliniques, car ces deux ensembles de variables décrivent des aspects différents du profil des personnes. On s’attend toutefois à observer certains recoupements entre les groupes.
+Les groupes formés à partir des habitudes de vie présenteront un accord un peu plus faible avec les catégories de risque observées que les groupes formés à partir des variables cliniques.
 
 ## Préparation et comparaison des groupes
 
@@ -28,22 +28,22 @@ Nous créerons les deux segmentations à partir des mêmes personnes, puis nous 
 
 ## Répartition des tâches
 
-| Membre                                                 | Responsabilité                                             | Tâches                                                                                                                                                                                |
-|----------------|----------------|-----------------------------------------|
-| **Ninive : Analyse exploratoire (EDA)**                | Décrire les données et les six variables retenues.         | Vérifier les valeurs manquantes et les catégories, résumer les variables cliniques et les habitudes de vie avec des tableaux et des graphiques simples.                               |
-| **Albert : k-moyennes (k-means)**                      | Réaliser et comparer les segmentations.                    | Documenter la préparation des variables, appliquer les k-moyennes aux deux groupes de variables, puis comparer les résultats avec un tableau croisé et l’indice de Rand ajusté (ARI). |
-| **Ève : Affiche**                                      | Préparer la présentation visuelle du projet.               | Organiser la problématique, l’objectif, l’hypothèse, les méthodes, les principaux résultats et la conclusion sur l’affiche.                                                           |
-| **Aymeric : Analyse en composantes principales (ACP)** | Visualiser les profils et aider à interpréter les groupes. | Réaliser une ACP pour les variables cliniques et une pour les variables d’habitudes de vie après leur préparation, produire les graphiques et résumer les axes principaux.            |
+| Membre                                                         | Responsabilité                                     | Tâches                                                                                                                                                                                |
+|------------------|------------------|-------------------------------------|
+| **Ninive : Analyse exploratoire (EDA)**                        | Décrire les données et les six variables retenues. | Vérifier les valeurs manquantes et les catégories, résumer les variables cliniques et les habitudes de vie avec des tableaux et des graphiques simples.                               |
+| **Albert : k-moyennes (k-means)**                              | Réaliser et comparer les segmentations.            | Documenter la préparation des variables, appliquer les k-moyennes aux deux groupes de variables, puis comparer les résultats avec un tableau croisé et l’indice de Rand ajusté (ARI). |
+| **Ève : Affiche**                                              | Préparer la présentation visuelle du projet.       | Organiser la problématique, l’objectif, l’hypothèse, les méthodes, les principaux résultats et la conclusion sur l’affiche.                                                           |
+| **Aymeric : Arbres de classification et de régression (CART)** |                                                    |                                                                                                                                                                                       |
 
 ## Démarche générale
 
 1.  Décrire les six variables retenues, repérer les valeurs manquantes et consigner leur traitement.
 2.  Préparer et documenter les deux ensembles de variables : cliniques et habitudes de vie.
 3.  Appliquer les k-moyennes aux mêmes personnes pour chacun des ensembles.
-4.  Comparer les groupes avec un tableau croisé et l’ARI. Utiliser les ACP pour visualiser les profils.
+4.  Comparer les groupes avec un tableau croisé et l’ARI. Utiliser CART pour visualiser les profils.
 5.  Présenter les résultats et les limites, notamment celles du codage et le fait que les groupes sont des profils statistiques, pas des diagnostics médicaux.
 
 ## Sources
 
--   **Notes de cours du professeur** : notes sur l’EDA (`Notes de cours/EDA.pdf`), l’ACP (`Notes de cours/ACP.pdf`) et les k-moyennes (`Notes de cours/k-means.pdf`).
+-   **Notes de cours du professeur** : notes sur l’EDA (`Notes de cours/EDA.pdf`) et les k-moyennes (`Notes de cours/k-means.pdf`).
 -   **Jeu de données** : *Diabetes Risk Prediction Dataset — 50K Patients*, disponible sur [Kaggle](https://www.kaggle.com/datasets/mobeenfatimah/diabetes-risk-prediction-dataset-50k-patients) et utilisé dans le projet sous le nom `data/raw/diabetes_risk.csv`.
