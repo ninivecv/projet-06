@@ -8,6 +8,8 @@
 # Depuis la racine du projet ; données dans data/raw/diabetes_risk.csv.
 
 # 0. FONCTIONS ------------------------------------------------------
+library(readr)
+diabetes_risk <- read_csv("C:/Users/aymer/OneDrive/Bureau/analyse de données/projet-06/data/raw/diabetes_risk.csv")
 
 compter_feuilles <- function(arbre) {
   sum(arbre$frame$var == "<leaf>")
@@ -36,25 +38,23 @@ diabetes_risk <- read.csv("data/raw/diabetes_risk.csv", stringsAsFactors = FALSE
 activite_brute <- trimws(diabetes_risk$Physical_Activity_Level)
 activite_brute[activite_brute == ""] <- NA
 
-# CART n'a pas besoin du codage 1-2-3 : il travaille directement avec
-# les catégories. Facteur ORDONNÉ = coupures du type « ≤ Average »,
-# qui respectent l'ordre. Facteur NON ordonné = toutes les façons de
-# séparer les modalités en deux sous-ensembles (ex. {Never, Current}
-# contre {Former}). Le tabagisme est laissé non ordonné : on ne suppose
-# pas que « Former » est forcément entre « Never » et « Current ».
+# Habitudes de vie codées 1-2-3 selon leur ordre naturel :
+#   Activite : Low = 1, Moderate = 2, High = 3
+#   Alim     : Poor = 1, Average = 2, Healthy = 3
+#   Tabac    : Never = 1, Former = 2, Current = 3
+# match() donne NA pour une réponse absente ou vide.
+# La réponse Diabetes_Risk reste un FACTEUR (Low / Moderate / High) : codée
+# en nombre, rpart ferait une régression au lieu d'une classification.
 donnees <- data.frame(
   # Noms courts, pour que les étiquettes des arbres restent lisibles.
   IMC             = diabetes_risk$BMI,
   HbA1c           = diabetes_risk$HbA1c,
   Glycemie        = diabetes_risk$Blood_Glucose,
-  Alim            = factor(diabetes_risk$Diet_Quality,
-                           levels = c("Poor", "Average", "Healthy"),
-                           ordered = TRUE),
-  Activite        = factor(activite_brute,
-                           levels = c("Low", "Moderate", "High"),
-                           ordered = TRUE),
-  Tabac           = factor(diabetes_risk$Smoking_Status,
-                           levels = c("Never", "Former", "Current")),
+  Alim            = match(diabetes_risk$Diet_Quality,
+                          c("Poor", "Average", "Healthy")),
+  Activite        = match(activite_brute, c("Low", "Moderate", "High")),
+  Tabac           = match(diabetes_risk$Smoking_Status,
+                          c("Never", "Former", "Current")),
   Diabetes_Risk   = factor(diabetes_risk$Diabetes_Risk,
                            levels = c("Low", "Moderate", "High"))
 )
@@ -100,6 +100,30 @@ for (risque in levels(train$Diabetes_Risk)) {
   indices <- which(train$Diabetes_Risk == risque)
   plis[indices] <- sample(rep(seq_len(nb_plis), length.out = length(indices)))
 }
+# Standardiser les habitudes de vie (codes 1-2-3) : moyenne et écart-type
+# estimés sur l'ENTRAÎNEMENT seulement, puis appliqués au test.
+# Remarque : un arbre CART ne compare que des seuils, donc une transformation
+# croissante (comme la standardisation) donne EXACTEMENT les mêmes coupures
+# et les mêmes prédictions ; seuls les seuils affichés changent d'unité.
+# Mettre FALSE pour garder les codes 1-2-3, plus lisibles dans les arbres.
+standardiser_habitudes <- TRUE
+if (standardiser_habitudes) {
+  moyennes_hab <- colMeans(train[variables_habitudes])
+  ecarts_hab <- vapply(train[variables_habitudes], sd, numeric(1))
+  stopifnot(all(ecarts_hab > 0))
+  train[variables_habitudes] <- as.data.frame(
+    scale(train[variables_habitudes], center = moyennes_hab, scale = ecarts_hab))
+  test[variables_habitudes] <- as.data.frame(
+    scale(test[variables_habitudes], center = moyennes_hab, scale = ecarts_hab))
+  cat("Habitudes standardisées (moyennes et écarts-types d'entraînement) :\n")
+  print(rbind(moyenne = moyennes_hab, ecart_type = ecarts_hab))
+  # Correspondance code -> valeur standardisée, pour lire les seuils des arbres.
+  cat("Valeur standardisée de chaque code :\n")
+  print(round(sapply(variables_habitudes, function(v) {
+    (1:3 - moyennes_hab[[v]]) / ecarts_hab[[v]]
+  }), 3))
+}
+
 print(rbind(entrainement = table(train$Diabetes_Risk),
             test = table(test$Diabetes_Risk)))
 cat("Plis de validation, uniquement dans l'entraînement :\n")
@@ -118,7 +142,8 @@ controle <- rpart::rpart.control(
 # cp = 0 : développer l'arbre sous les contraintes de taille.
 # xval = 0 : désactiver la CV interne, puisque nos plis sont explicites.
 # maxsurrogate = 0 : pas de coupures de remplacement, cas complets ici.
-# On ne standardise pas les variables ; CART compare des seuils.
+# Variables médicales non standardisées : CART compare des seuils.
+# Habitudes standardisées à la section 1 (sans effet sur les prédictions).
 
 ajuster_cart <- function(donnees, variables, reequilibre = FALSE) {
   # Diabetes_Risk est la réponse ; elle n'est jamais un prédicteur.
@@ -397,6 +422,155 @@ tracer_tableau_resultats()
 dev.off()
 
 
+# 5b. POURCENTAGE DE BONNES PRÉDICTIONS ----------------------------------
+
+# Pour chaque arbre (et la référence), sur le test réservé :
+# - Global : % de tous les patients du test bien classés (exactitude) ;
+# - Low / Moderate / High : parmi les patients RÉELLEMENT dans cette
+#   catégorie, % que l'arbre a bien classés (rappel de la catégorie).
+predictions_toutes <- c(lapply(resultats, function(r) r$prediction),
+                        list(reference = prediction_reference))
+noms_arbres <- c(vapply(modeles, function(m) m$etiquette, character(1)),
+                 reference = "Référence")
+
+bonnes_predictions <- do.call(rbind, lapply(names(predictions_toutes), function(nom) {
+  correct <- predictions_toutes[[nom]] == test$Diabetes_Risk
+  par_categorie <- 100 * tapply(correct, test$Diabetes_Risk, mean)
+  data.frame(
+    Arbre = noms_arbres[[nom]],
+    Bonnes = sum(correct),
+    Total = length(correct),
+    Global_pct = round(100 * mean(correct), 2),
+    Low_pct = round(par_categorie[["Low"]], 2),
+    Moderate_pct = round(par_categorie[["Moderate"]], 2),
+    High_pct = round(par_categorie[["High"]], 2),
+    check.names = FALSE
+  )
+}))
+
+cat("\n5b. Pourcentage de bonnes prédictions sur le test réservé\n")
+cat("Effectifs réels du test :", paste(names(table(test$Diabetes_Risk)),
+                                       table(test$Diabetes_Risk), collapse = " ; "), "\n")
+print(bonnes_predictions, row.names = FALSE)
+
+# Matrices de confusion en pourcentage de chaque catégorie réelle :
+# chaque ligne totalise 100 % ; la diagonale = bonnes prédictions.
+cat("\nMatrices de confusion en % par catégorie réelle (lignes = 100 %) :\n")
+for (nom in names(resultats)) {
+  cat("\n---", noms_arbres[[nom]], "\n")
+  confusion <- table(reelle = test$Diabetes_Risk,
+                     predite = resultats[[nom]]$prediction)
+  print(round(100 * prop.table(confusion, margin = 1), 1))
+}
+
+# Taux moyen : moyenne des trois taux par catégorie (= exactitude
+# équilibrée). Contrairement au Global, chaque catégorie y compte pour un
+# tiers, même Low (131 patients). Un modèle qui prédit toujours la même
+# classe obtient 33,33 %.
+bonnes_predictions$Moyenne_pct <- round(
+  rowMeans(bonnes_predictions[c("Low_pct", "Moderate_pct", "High_pct")]), 2)
+
+# Taux de détection réussi total pour chaque trio de variables,
+# en version standard et en version rééquilibrée.
+ligne_de <- function(etiquette) bonnes_predictions[bonnes_predictions$Arbre == etiquette, ]
+taux_par_trio <- do.call(rbind, lapply(
+  list(c("Médicales", "Médicales", "Médicales rééq."),
+       c("Habitudes", "Habitudes", "Habitudes rééq."),
+       c("Référence", "Référence", "Référence")),
+  function(x) {
+    std <- ligne_de(x[2]); reeq <- ligne_de(x[3])
+    data.frame(
+      Trio = x[1],
+      Standard_bonnes = std$Bonnes,
+      Standard_total_pct = std$Global_pct,
+      Standard_moyen_pct = std$Moyenne_pct,
+      Reeq_bonnes = reeq$Bonnes,
+      Reeq_total_pct = reeq$Global_pct,
+      Reeq_moyen_pct = reeq$Moyenne_pct
+    )
+  }))
+
+cat("\nTaux de détection réussi total par trio de variables (test, n =",
+    nrow(test), ")\n")
+cat("total = bonnes prédictions / tous les patients ;",
+    "moyen = moyenne des taux Low, Moderate et High\n")
+print(taux_par_trio, row.names = FALSE)
+
+# Dessin générique d'un tableau en R de base : une ligne d'en-tête colorée,
+# des lignes alternées, des traits horizontaux optionnels pour séparer.
+tracer_tableau <- function(valeurs, en_tete, titre, note, separations = NULL,
+                           cex = 0.8) {
+  valeurs <- as.matrix(as.data.frame(lapply(valeurs, as.character)))
+  largeurs <- pmax(nchar(en_tete), apply(nchar(valeurs), 2, max)) + 3
+  bords <- c(0, cumsum(largeurs))
+  n_lignes <- nrow(valeurs) + 1L
+  
+  par(mfrow = c(1, 1), mar = c(4, 1, 3.5, 1))
+  plot.new()
+  plot.window(xlim = c(0, sum(largeurs)), ylim = c(0, n_lignes))
+  for (i in seq_len(n_lignes)) {
+    haut <- n_lignes - i + 1
+    fond <- if (i == 1L) "#007C78" else if (i %% 2 == 0) "#EEF4F4" else "white"
+    rect(0, haut - 1, sum(largeurs), haut, col = fond, border = NA)
+    textes <- if (i == 1L) en_tete else valeurs[i - 1, ]
+    couleur <- if (i == 1L) "white" else "black"
+    police <- if (i == 1L) 2 else 1
+    text(bords[1] + 1, haut - 0.5, textes[1], adj = 0, cex = cex,
+         col = couleur, font = police)
+    text((bords[-1][-1] + bords[-length(bords)][-1]) / 2, haut - 0.5,
+         textes[-1], cex = cex, col = couleur, font = police)
+  }
+  # separations : numéros des lignes de données APRÈS lesquelles tracer un trait.
+  if (length(separations) > 0) {
+    y <- n_lignes - 1 - separations
+    segments(0, y, sum(largeurs), y, col = "#aab7bb", lwd = 2)
+  }
+  rect(0, 0, sum(largeurs), n_lignes, border = "#aab7bb")
+  title(titre)
+  mtext(note, side = 1, line = 1, cex = 0.75)
+}
+
+tracer_bonnes_predictions <- function() {
+  tracer_tableau(
+    bonnes_predictions,
+    en_tete = c("Arbre", "Bonnes prédictions", "Total", "Global (%)",
+                "Low (%)", "Moderate (%)", "High (%)", "Moyenne (%)"),
+    titre = paste("Pourcentage de bonnes prédictions sur le test réservé (n =",
+                  nrow(test), ")"),
+    note = paste("Global = tous les patients ; Low / Moderate / High = parmi les",
+                 "patients réellement dans cette catégorie ; Moyenne = des trois"),
+    separations = c(2, 4)
+  )
+}
+
+tracer_taux_par_trio <- function() {
+  tracer_tableau(
+    taux_par_trio,
+    en_tete = c("Trio", "Bonnes (std)", "Total (std, %)", "Moyen (std, %)",
+                "Bonnes (rééq.)", "Total (rééq., %)", "Moyen (rééq., %)"),
+    titre = "Taux de détection réussi total par trio de variables",
+    note = paste("Total = bonnes prédictions / 13990 patients ;",
+                 "Moyen = moyenne des taux Low, Moderate et High"),
+    separations = 2
+  )
+}
+
+write.csv(bonnes_predictions,
+          file.path("resultats", "CART", "bonnes_predictions.csv"),
+          row.names = FALSE, fileEncoding = "UTF-8")
+write.csv(taux_par_trio,
+          file.path("resultats", "CART", "taux_par_trio.csv"),
+          row.names = FALSE, fileEncoding = "UTF-8")
+png(file.path("resultats", "CART", "bonnes_predictions.png"),
+    width = 2800, height = 900, res = 180)
+tracer_bonnes_predictions()
+dev.off()
+png(file.path("resultats", "CART", "taux_par_trio.png"),
+    width = 2600, height = 700, res = 180)
+tracer_taux_par_trio()
+dev.off()
+
+
 # 6. GRAPHIQUES ------------------------------------------------------------
 
 # Taille de dessin lisible : au plus 20 feuilles.
@@ -454,6 +628,8 @@ dessiner_cart_diabete <- function() {
   
   # 0. Le tableau récapitulatif, dessiné dans le panneau Plots.
   tracer_tableau_resultats()
+  tracer_bonnes_predictions()
+  tracer_taux_par_trio()
   
   # A. Erreur de validation selon cp : un panneau par version, car les
   # critères diffèrent (erreur simple ou erreur équilibrée).

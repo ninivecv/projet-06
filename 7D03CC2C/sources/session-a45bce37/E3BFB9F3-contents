@@ -1,0 +1,265 @@
+---
+title: "Analyse du profit brut de films en fonction de leur budget initial"
+anonyme: false
+format:
+  poster-typst:
+    size: "a1-landscape"
+    num-columns: 3
+    poster-authors: "Thierry Larochelle, Aymeric Pigeon, Marie Soucy, Noam Watters-Kim"
+    departments: "STT-1100 - Introduction à la science des données"
+    title-column-size: 30
+    authors-font-size: 26
+    footer-text-font-size: 24
+    footer-url-font-size: 16
+    footer-text: "Université Laval"
+    footer-url: ""
+    footer-emails: ""
+    footer-color: "b7d7d8"
+    keywords: ["question", "données", "visualisation", "interprétation"]
+execute:
+  echo: false
+  warning: false
+  message: false
+embed-resources: true
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(forcats)
+
+donnees <- read_csv("data/movies.csv", show_col_types = FALSE)
+
+glimpse(donnees)
+
+donnees %>%
+  count(company, sort = TRUE
+       )
+
+donnees_propres <- donnees %>%
+  filter(
+    if_all(c(budget, gross, score,genre), ~ !is.na(.)))
+  
+ donnees_propres <- donnees_propres %>%
+   mutate(budget_million = budget/1000000,
+         gross_million = gross/1000000,
+         ROI = if_else(
+  budget_million > 0,
+  round((gross_million - budget_million) / budget_million, 2),
+  NA_real_),
+  multiple = gross_million/budget_million,
+  rentable = multiple >= 2.5,
+          budget_million = round(budget_million),
+         gross_million = round(gross_million,2),
+         tranche = cut(budget_million, c(0, 10, 30, 80, Inf),
+                  labels = c("< 10 M$", "10–30 M$", "30–80 M$", "> 80 M$")),)%>%
+  select(name, budget_million, gross_million, score,ROI,tranche,rentable) %>%
+  arrange(desc(budget_million))
+  
+
+  
+
+
+
+  
+
+ 
+
+
+
+
+         
+      
+```
+
+# Question
+
+
+::: {.block fill="luma(238)" inset="8pt" radius="4pt"}
+Y a t-il un lien direct entre le budget initial d'un film et les recettes totales rapportées.
+:::
+
+Il est facile de supposer qu'un film ayant un énorme budget sera populaire ou rapportera une somme importante de profits, mais peut-on vraiment l'affirmer? Cette analyse servira d'outil pour conclure sur cette question.
+
+# Données
+
+
+- source; https://github.com/ThomasFurtado/Movies-Dataset-IMDb/blob/main/movies.csv
+- période couverte; 1980-2020
+- unités d'observation; Films produits entre 1980 et 2020
+- nombre d'observations et méthode de collecte; 7668, 
+- variables importantes; name (nom du film), budget, gross (recettes totales), rating (cote IMDb)
+- fiabilité, représentativité et limites connues; Fiable car tirées d'une base de données reconnue, représentative puisque grand nombre de données. Limites: pas tous  les films, rien avant 1980 et après 2020, donc les normes pourraient avoir changé.
+
+Les données utilisées proviennent d'une page github ayant trié un ensemble de 7668 films tirés de la banque de films IMDb. Tous les films ont été produits entre 1980 et 2020 et ont été triés préalablement sur GitHub.
+
+i
+```{r echo=FALSE, out.width="70%", fig.align= "left"}
+
+knitr::include_graphics("Image IMDb.png",dpi = 2000)
+
+```
+
+
+```{=typst}
+#colbreak()
+```
+
+# Contexte
+
+
+
+```{r}
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| echo: FALSE
+
+ggplot(donnees_propres, aes(x = budget_million, y = gross_million,)) +
+  
+  geom_point(size = 1) +
+  geom_smooth(color ="firebrick2", method = "lm", se = TRUE)+
+  scale_x_log10()+
+  scale_y_log10()+
+  labs(
+    title = "Recettes totales en fonction du budget",
+    x = "Budget (log_millions)",
+    y = "Recettes totales (log_millions)",
+   )+
+  theme_minimal()+
+  theme( plot.title = element_text(hjust = 0.5,size = 16),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10))
+```
+
+
+
+
+```{r}
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| echo: FALSE
+
+donnees_graphique <- donnees %>%
+  filter(
+    !is.na(budget),
+    !is.na(gross),
+    budget > 0,
+    gross >= 0
+  ) %>%
+  mutate(
+    budget_million = budget / 1000000,
+    multiplicateur = gross / budget,
+
+    tranche = cut(
+      budget_million,
+      breaks = c(0, 10, 30, 80, Inf),
+      labels = c("< 10 M$", "10–30 M$", "30–80 M$", "≥ 80 M$"),
+      right = FALSE
+    ),
+
+    rentabilite = case_when(
+      multiplicateur < 1 ~ "Perte",
+      multiplicateur < 2.5 ~ "Remboursé",
+      multiplicateur <= 10 ~ "Rentable",
+      multiplicateur > 10 ~ "Gros succès"
+    ))
+
+    
+  donnees_graphique %>%
+  count(tranche, rentabilite) %>%
+  ggplot(aes(x = tranche, y = n, fill = rentabilite)) +
+    geom_col(position = "fill") +
+  scale_y_continuous(
+    labels = scales::percent_format(),
+    breaks = seq(0, 1, by = 0.1)
+  ) +
+    scale_fill_manual(
+  values = c(
+    "Perte" = "firebrick2",
+    "Remboursé" = "gold1",
+    "Rentable" = "green3",
+    "Gros succès" = "deepskyblue1"
+  )
+)+
+  labs(
+    title = "Rentabilité des films selon leur budget",
+    subtitle = "Rentable: recettes entre 2,5 et 10x le budget , Gros succès: recettes 10x et plus le budget",
+    x = "Tranche de budget",
+    y = "Pourcentage de films",
+    fill = "Rentabilité"
+  ) +
+    theme_minimal()+
+    theme(legend.position = "bottom",
+          plot.title = element_text(hjust = 0.5,size = 16),
+          plot.subtitle = element_text(hjust = 0.5,size = 10),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10))
+    
+  
+```
+```{r}
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| echo: FALSE
+
+ggplot(donnees_propres, aes(x = budget_million, y = ROI,)) +
+  geom_point(size = 1) +
+  geom_smooth(color = "red", method = "nls", se = TRUE)+
+  labs(
+    title = "Retour sur investissement de films en fonction du budget",
+    x = "Budget (millions $)",
+    y = "Efficacité",
+   )+
+  ylim(c(0,100))+
+  theme_minimal()+
+  theme( plot.title = element_text(hjust = 0.5,size = 16),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10))
+```
+
+```{=typst}
+#colbreak()
+```
+
+# Résultat principal
+
+Le premier nuage de points indique que les recettes totales augmentent généralement avec le budget : les films les plus coûteux tendent à générer davantage de revenus. Toutefois, la dispersion des points montre qu’un budget élevé n’assure pas un succès commercial et qu’il existe des exceptions dans toutes les catégories de budget.
+
+La proportion de films rentables augmente progressivement avec le budget. Pour les films dont le budget est inférieur à 10 M`$`, environ 30 % sont rentables, tandis que cette proportion dépasse 50 % pour les films de plus de 80 M`$`. À l’inverse, les pertes sont beaucoup plus fréquentes parmi les films à faible budget. Cependant, c’est également dans cette catégorie que l’on retrouve la plus forte proportion de très grands succès.
+
+
+
+
+# Interprétation
+
+
+
+Ces résultats suggèrent que les gros budgets offrent un rendement plus stable et prévisible, alors que les petits budgets comportent davantage de risques, mais aussi un potentiel de gains exceptionnellement élevé.
+
+# Limites
+
+Les graphiques ne démontrent pas que l’augmentation du budget est la cause directe de la rentabilité. Ils mettent seulement en évidence une association entre les deux variables. D’autres facteurs pouvant accompagner un budget élevé, comme la force du marketing ou la présence d’acteurs populaire peuvent également contribuer au succès commercial.
+
+# À retenir
+
+::: {.block fill="rgb(233, 246, 245)" inset="10pt" radius="4pt"}
+Les films à gros budget génèrent généralement davantage de recettes et présentent une probabilité plus élevée d’être rentables. Toutefois, les rendements les plus spectaculaires proviennent principalement des films à faible budget.
+
+Autrement dit, un budget élevé réduit le risque financier sans garantir un succès exceptionnel, tandis qu’un faible budget représente un investissement plus risqué, mais offrant le plus grand potentiel de rendement. 
+
+# Sources
+
+
+- Source des données: https://github.com/ThomasFurtado/Movies-Dataset-IMDb/blob/main/movies.csv
+- Documentation: aucune
+- Graphiques ou images externes: aucune
+- Outils utilisés: Rstudio, GPT-STT-1100
+
+
