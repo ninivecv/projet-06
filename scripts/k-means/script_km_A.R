@@ -87,7 +87,6 @@ p1 <- plot(1:8, W,
      xlab = "Nombre de clusters (k)",
      ylab = "WSS (Within-Cluster Sum of Squares)",
      main = "Méthode du coude")
-print(p1)
 
 ## FIGURE 2 : silhouette moyenne en fonction de k -
 
@@ -141,12 +140,15 @@ sil <- cluster::silhouette(km$cluster, dist(z))
 cat("  Silhouette moyenne =", round(mean(sil[, "sil_width"]), 3), "\n")
 
 ## FIGURE 5 : projection 2D des individus, colorés par profil (ACP utilisée) -
+pal <- c("#1F77B4", "#FF7F0E", "#CC79A7", "#8DA0CB", "#009E73", "#FFD92F", "#B2182B")
 
-p5 <- fviz_cluster(km, data = z,
-                   ellipse.type = "norm",
-                   geom = "point",
-                   palette = "jco",
-                   main = "Profils issus du k-moyennes (projection ACP)") +
+idx <- sample(nrow(z), 2000)                  # un échantillon suffit, sinon c'est lent
+df5 <- data.frame(z[idx, ], groupe = factor(km$cluster[idx]))
+
+p5 <- ggpairs(df5, columns = seq_len(ncol(z)),
+              mapping = aes(color = groupe, alpha = 0.4)) +
+  scale_color_manual(values = pal[seq_len(k_souhaite)]) +
+  scale_fill_manual(values = pal[seq_len(k_souhaite)]) +
   theme_minimal()
 print(p5)
 
