@@ -29,7 +29,7 @@ facteurs_B <- c("Smoking_Status", "Physical_Activity_Level", "Diet_Quality")
 
 ## 1c. Déterminer k_souhaite :
 
-k_souhaite <- 4           #voir FIGURE 1 : méthode du coude
+k_souhaite <- 8           #voir FIGURE 1 : méthode du coude
 
 ## ---------- 2. PRÉPARATION DES DONNÉES ----------
 
