@@ -13,3 +13,6 @@ Antidote, un outil d’aide à la rédaction intégré au logiciel utilisé par 
 
 L’IA a aidé à structurer le code R pour vérifier les variables, résumer les mesures cliniques et les habitudes de vie ainsi que de produire les tableaux et graphiques de l’analyse exploratoire.
 
+## Usage 4 - Structure partielle du code pour les graphiques des k-moyennes
+
+L’IA a aidé à structurer le squelette du code R pour produire les tableaux et graphiques des k-moyennes.
