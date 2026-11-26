@@ -5,7 +5,7 @@
 
 ## ---------- 0. PACKAGES (installer une seule fois) ----------
 
-install.packages(c("cluster", "factoextra", "NbClust", "ggplot2", "GGally", "scales"))
+##install.packages(c("cluster", "factoextra", "NbClust", "ggplot2", "GGally", "scales"))
 
 library(cluster)      # silhouette()
 library(factoextra)   # fviz_nbclust(), fviz_cluster(), fviz_silhouette()
@@ -20,7 +20,7 @@ set.seed(2200)        # reproductibilité (l'algorithme a une part d'aléatoire)
 
 ## 1a. Charger la base de données "donnees" :
 
-donnees <- read.csv("diabetes_risk.csv")
+donnees <- read.csv("./data/raw/diabetes_risk.csv")
 
 ## 1b. Les 3 facteurs du groupe A :
 
@@ -113,11 +113,24 @@ barplot(table(nb$Best.nc[1, ]),
 km <- kmeans(z, centers = k_souhaite, nstart = 50, iter.max = 1000,
              algorithm = "Lloyd")
 
+km2 <- kmeans(z, centers = 2, nstart = 50, iter.max = 1000,
+             algorithm = "Lloyd")
+km6 <- kmeans(z, centers = 6, nstart = 50, iter.max = 1000,
+             algorithm = "Lloyd")
+
 ## Numéroter les groupes selon la moyenne du 1er facteur -
 
 ordre <- order(km$centers[, facteurs_A[1]])
 groupes  <- match(km$cluster, ordre)
 km$cluster <- groupes
+
+ordre <- order(km2$centers[, facteurs_A[1]])
+groupes  <- match(km2$cluster, ordre)
+km2$cluster <- groupes
+
+ordre <- order(km6$centers[, facteurs_A[1]])
+groupes  <- match(km6$cluster, ordre)
+km6$cluster <- groupes
 
 ## Centres en unités originales + valeurs importantes (pour interpréter les profils concrètement) -
 
@@ -188,4 +201,10 @@ p8 <- ggplot(profils_long,
        x = "Facteur", y = "Profil") +
   theme_minimal()
 print(p8)
+
+#### export des groupes
+
+groupes_test <- cbind(d, grp_km2_cli = km2$cluster,  grp_km6_cli = km6$cluster )
+write.csv(groupes_test, "data/processed/groupes_kmeans_clin.csv")
+
 

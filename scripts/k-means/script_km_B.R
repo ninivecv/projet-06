@@ -5,7 +5,7 @@
 
 ## ---------- 0. PACKAGES (installer une seule fois) ----------
 
-install.packages(c("cluster", "factoextra", "NbClust", "ggplot2", "GGally", "scales", "klaR"))
+#install.packages(c("cluster", "factoextra", "NbClust", "ggplot2", "GGally", "scales", "klaR"))
 
 library(cluster)      # silhouette()
 library(factoextra)   # fviz_nbclust(), fviz_cluster(), fviz_silhouette()
@@ -182,7 +182,10 @@ p5 <- ggplot(prop_long, aes(x = modalite, y = groupe, fill = prop)) +
   theme_minimal()
 print(p5)
 
+### Export des groupes
 
+groupes_test <- d |> rename (grp_km_hab = groupe)
+write.csv(groupes_test, "data/processed/groupes_kmeans_hAB.csv")
 
 
 
