@@ -9,7 +9,7 @@
 
 # 0. FONCTIONS ------------------------------------------------------
 library(readr)
-diabetes_risk <- read_csv("C:/Users/aymer/OneDrive/Bureau/analyse de données/projet-06/data/raw/diabetes_risk.csv")
+diabetes_risk <- read_csv("data/raw/diabetes_risk.csv")
 
 compter_feuilles <- function(arbre) {
   sum(arbre$frame$var == "<leaf>")
