@@ -4,6 +4,7 @@
 
 library(dplyr)
 library(aricode)
+library(ggplot2)
 source("./scripts/utilitaire.R")
 
 ###########################
