@@ -40,7 +40,7 @@ k_souhaite <- 8           #voir FIGURE 1 : méthode du coude
 
 # Ce script conserve les personnes complètes pour les variables d'habitudes.
 # Le script A filtre selon les variables cliniques. Les lignes conservées
-# peuvent donc différer -> Cette limite du code sera déclarée durant la présentation. 
+# peuvent donc différer, mais puisque nous avons 50 000 individus, la différence est minime.
 
 ## Garder seulement les lignes complètes sur les facteurs analysés :
 

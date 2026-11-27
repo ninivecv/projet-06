@@ -1,0 +1,122 @@
+---
+title: "STT-2100 - Régression - Devoir 2"
+subtitle: "Gabarit des réponses"
+author: "[Aymeric Pigeon]"
+lang: fr-CA
+format:
+  typst:
+    papersize: us-letter
+    fontsize: 10.5pt
+    margin:
+      x: 0.75in
+      y: 0.65in
+    toc: false
+  html:
+    embed-resources: true
+    toc: true
+execute:
+  echo: true
+---
+
+Ce gabarit suit les questions de `consignes.html`. Remplacez les indications entre crochets par vos réponses. Présentez les résultats et les graphiques qui appuient votre démarche. Ajoutez les blocs R produisant vos résultats.
+
+Pour produire le PDF à remettre sur Gradescope, choisissez le rendu **Typst** dans le menu **Render**.
+
+# Question 1 (15 points)
+
+\[Insérez votre réponse à la question 1. Exemple de formule : $Y_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \varepsilon_i$.\]
+
+{{< pagebreak >}}
+
+# Question 2 (85 points)
+
+**Scénario choisi** · \[Jardin\]
+
+## (i) Fiche statistique
+
+```{r}
+#| label: importation des donnees 
+#| eval: false
+# Remplacez nom_du_fichier par le nom de votre fichier de donnees. 
+# Changer la valeur de eval pour TRUE
+donnees <- read.csv("C:/Users/aymer/OneDrive/Bureau/regression/STT-2100 - Devoir 2 - A2026/Scénarios/Donnees_jardin.csv")
+```
+
+### (a) Relations individuelles et choix d’une variable explicative (15 points)
+
+\[Le bloc ci-dessous est un exemple de bloc de code attendu dans ce devoir. Le code est affiché dans le pdf et le graphique correspondant aussi.\]
+
+```{r}
+#| label: relations-individuelles
+plot(dist ~ speed, data = cars,
+     xlab = "Vitesse (mi/h)", ylab = "Distance d’arrêt (pi)",
+     main = "Nuage de points de la distance en fonction de la vitesse")
+```
+
+### (b) Multicolinéarité (15 points)
+
+\[…\]
+
+```{r}
+#| label: colinearite
+```
+
+### (c) Sélection et validation du modèle (30 points)
+
+#### 1. Démarche de sélection
+
+\[…\]
+
+```{r}
+#| label: selection
+```
+
+#### 2. Vérification des postulats
+
+\[…\]
+
+```{r}
+#| label: diagnostics
+```
+
+#### 3. Équation estimée et interprétation des coefficients
+
+\[…\]
+
+```{r}
+#| label: coefficients
+```
+
+### (d) Questions sur un modèle imposé (15 points)
+
+```{r}
+#| label: modele-impose
+```
+
+#### 1.
+
+\[…\]
+
+```{r}
+#| label: effet-esperance
+```
+
+#### 2.
+
+\[…\]
+
+```{r}
+#| label: interaction
+```
+
+#### 3.
+
+\[…\]
+
+```{r}
+#| label: prevision
+```
+
+## (ii) Synthèse pour le ou la chercheur(e) du scénario (10 points)
+
+**Usage de l’IA** · \[…\]
