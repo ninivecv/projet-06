@@ -29,14 +29,25 @@ facteurs_B <- c("Smoking_Status", "Physical_Activity_Level", "Diet_Quality")
 
 ## 1c. Déterminer k_souhaite :
 
+# k = 8 est retenu parmi les valeurs testées (de 2 à 8).
+# Comme 8 est la limite supérieure de cette plage, tester des valeurs plus
+# élevées pourrait révéler une autre solution. Le choix de k reste à interpréter
+# avec les critères de regroupement et le sens des profils obtenus.
+
 k_souhaite <- 8           #voir FIGURE 1 : méthode du coude
 
 ## ---------- 2. PRÉPARATION DES DONNÉES ----------
+
+# Ce script conserve les personnes complètes pour les variables d'habitudes.
+# Le script A filtre selon les variables cliniques. Les lignes conservées
+# peuvent donc différer -> Cette limite du code sera déclarée durant la présentation. 
 
 ## Garder seulement les lignes complètes sur les facteurs analysés :
 
 d <- donnees[complete.cases(donnees[facteurs_B]), ]
 
+# Les réponses vides sont converties en NA avant le filtrage définitif.
+# Le filtrage effectué plus haut sera donc recalculé après ce nettoyage.
 
 ## Gestion des NA :
 for (v in facteurs_B) donnees[[v]][donnees[[v]] == ""] <- NA
