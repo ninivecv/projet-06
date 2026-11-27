@@ -1,21 +1,30 @@
+########################
+# packages nécessaires #
+########################
+
 library(dplyr)
 library(aricode)
 source("./scripts/utilitaire.R")
 
-#donnees raw
+###########################
+# importation donnees raw #
+###########################
 donnees <- read.csv("./data/raw/diabetes_risk.csv")
 donnees[donnees$Physical_Activity_Level == "", "Physical_Activity_Level" ] <- NA
+donnees_select <-donnees[c("Patient_ID", "BMI", "HbA1c", "Blood_Glucose", "Smoking_Status", "Physical_Activity_Level", "Diet_Quality", "Diabetes_Risk")]
+donnees_select <- donnees_select[complete.cases(donnees_select),]
 
-#groupes sortant de l'analyse
+############################################
+# importation groupes sortant de l'analyse #
+############################################
 km_clin <- read.csv("./data/processed/groupes_kmeans_clin.csv")
 km_hab <- read.csv("./data/processed/groupes_kmeans_hAB.csv")
 cart <- read.csv("./data/processed/groupes_cart.csv") |> rename (Patient_ID = X) 
 cart<-cart[, c("Patient_ID", "gr_CART_hab", "gr_CART_clin")]
 
-donnees_select <-donnees[c("Patient_ID", "BMI", "HbA1c", "Blood_Glucose", "Smoking_Status", "Physical_Activity_Level", "Diet_Quality", "Diabetes_Risk")]
-donnees_select <- donnees_select[complete.cases(donnees_select),]
-
-#mise en commun des groupes
+##############################
+# mise en commun des groupes #
+##############################
 groupes_tous <- donnees_select|> 
   left_join(
     km_clin[,c("Patient_ID", "grp_km2_cli", "grp_km6_cli")],
@@ -25,26 +34,35 @@ groupes_tous <- donnees_select|>
     by = "Patient_ID")|>
   left_join(cart, by="Patient_ID")
 
-# verif
+#########
+# verif #
+#########
 nrow(donnees_select)
 sum(complete.cases(donnees_select))
 
-###
-pal <- c("#1F77B4", "#FF7F0E", "#CC79A7", "#8DA0CB", "#009E73", "#FFD92F", "#B2182B")
+#################################
+# Échantillonage pour graphique #
+#################################
+#  notes - sections de codes réutilisées de km-a
 set.seed(2200)
-idx <- sample(nrow(groupes_tous), 2000)                  # un échantillon suffit, sinon c'est lent
+idx <- sample(nrow(groupes_tous), 2000)   # un échantillon suffit, sinon c'est lent
 df5 <- data.frame(groupes_tous[idx, ])
 
+############################################
+# Production des visualisations de groupes #
+############################################
 
-  g1 <- ggpairs(df5, columns = 2:4,
+# groupes km, k=2, variables cliniques
+g1 <- ggpairs(df5, columns = 2:4,
                 mapping = aes(color = factor(grp_km2_cli), alpha = 0.7)) +
     scale_color_manual(values = variee) +
     scale_fill_manual(values = variee) +
     theme_minimal()
   
-  
-ggsave("33-km2-clin.png", g1)  
-  g2 <- ggpairs(df5, 
+ggsave("33-km2-clin.png", g1) 
+
+# groupes km, k=6, variables cliniques
+g2 <- ggpairs(df5, 
                 columns = 2:4,
                 mapping = aes(color = factor(grp_km6_cli), 
                               alpha = 0.7),
@@ -52,31 +70,34 @@ ggsave("33-km2-clin.png", g1)
     scale_color_manual(values = variee) +
     scale_fill_manual(values = variee) +
     theme_minimal()
-  ggsave("33-km6-clin.png", g2)
-  
-  g3 <- ggpairs(df5, columns = 2:4,
+ggsave("33-km6-clin.png", g2)
+ 
+# groupes km, variables habitudes de vie 
+g3 <- ggpairs(df5, columns = 2:4,
                 mapping = aes(color = factor(grp_km_hab), alpha = 0.7),
                 columnLabels = c("IMC", "HbA1c", "Glucose")) +
     scale_color_manual(values = variee) +
     scale_fill_manual(values = variee) +
     theme_minimal()
-  ggsave("33-km-hab.png", g3)
-  
-  g4 <- ggpairs(df5[!is.na(df5$gr_CART_clin),], columns = 2:4,
+ggsave("33-km-hab.png", g3)
+
+# groupes CART, variables cliniques  
+g4 <- ggpairs(df5[!is.na(df5$gr_CART_clin),], columns = 2:4,
                 mapping = aes(color = factor(gr_CART_clin), alpha = 0.7),
                 columnLabels = c("IMC", "HbA1c", "Glucose")) +
     scale_color_manual(values = variee) +
     scale_fill_manual(values = variee) +
     theme_minimal()
-  ggsave("33-cart-clin.png", g4)
-  
-  g5 <- ggpairs(df5[!is.na(df5$gr_CART_hab),], columns = 2:4,
-                mapping = aes(color = factor(gr_CART_hab), alpha = 0.7),
-                columnLabels = c("IMC", "HbA1c", "Glucose")) +
+ggsave("33-cart-clin.png", g4)
+
+
+# groupes CART, variables habitudes de vie  
+g5 <- ggpairs(df5[!is.na(df5$gr_CART_hab),], columns = 2:4,
+                mapping = aes(color = factor(gr_CART_hab), alpha = 0.7)) +
     scale_color_manual(values = variee) +
     scale_fill_manual(values = variee) +
     theme_minimal()
-  ggsave("33-cart-hab.png", g5)
+ggsave("33-cart-hab.png", g5)
 
  
  ###############
