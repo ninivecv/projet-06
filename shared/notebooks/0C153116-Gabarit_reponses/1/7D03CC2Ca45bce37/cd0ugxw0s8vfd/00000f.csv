@@ -1,0 +1,5 @@
+"0","#| label: importation des donnees "
+"0","#| eval: false"
+"0","# Remplacez nom_du_fichier par le nom de votre fichier de donnees. "
+"0","# Changer la valeur de eval pour TRUE"
+"0","donnees <- read.csv(""C:/Users/aymer/OneDrive/Bureau/regression/STT-2100 - Devoir 2 - A2026/Scénarios/Donnees_jardin.csv"")"

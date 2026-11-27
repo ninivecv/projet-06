@@ -16,3 +16,7 @@ L’IA a aidé à structurer le code R pour vérifier les variables, résumer le
 ## Usage 4 - Structure partielle du code pour les graphiques des k-moyennes
 
 L’IA a aidé à structurer le squelette du code R pour produire les tableaux et graphiques des k-moyennes.
+
+## Usage 5 - CART
+
+L'IA a été utilisé pour aider construire l'arbre CART, les tableaux et les graphiques 

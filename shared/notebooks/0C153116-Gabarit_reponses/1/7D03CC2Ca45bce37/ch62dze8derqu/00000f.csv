@@ -1,0 +1,4 @@
+"0","#| label: relations-individuelles"
+"0","plot(dist ~ speed, data = cars,"
+"0","     xlab = ""Vitesse (mi/h)"", ylab = ""Distance d’arrêt (pi)"","
+"0","     main = ""Nuage de points de la distance en fonction de la vitesse"")"
