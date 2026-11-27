@@ -1,15 +1,21 @@
 library(dplyr)
+library(aricode)
+source("./scripts/utilitaire.R")
 
+#donnees raw
 donnees <- read.csv("./data/raw/diabetes_risk.csv")
 donnees[donnees$Physical_Activity_Level == "", "Physical_Activity_Level" ] <- NA
+
+#groupes sortant de l'analyse
 km_clin <- read.csv("./data/processed/groupes_kmeans_clin.csv")
 km_hab <- read.csv("./data/processed/groupes_kmeans_hAB.csv")
 cart <- read.csv("./data/processed/groupes_cart.csv") |> rename (Patient_ID = X) 
 cart<-cart[, c("Patient_ID", "gr_CART_hab", "gr_CART_clin")]
 
-donnees_select <-donnees[c("Patient_ID", "BMI", "HbA1c", "Blood_Glucose", "Smoking_Status", "Physical_Activity_Level", "Diet_Quality")]
+donnees_select <-donnees[c("Patient_ID", "BMI", "HbA1c", "Blood_Glucose", "Smoking_Status", "Physical_Activity_Level", "Diet_Quality", "Diabetes_Risk")]
 donnees_select <- donnees_select[complete.cases(donnees_select),]
 
+#mise en commun des groupes
 groupes_tous <- donnees_select|> 
   left_join(
     km_clin[,c("Patient_ID", "grp_km2_cli", "grp_km6_cli")],
@@ -19,7 +25,7 @@ groupes_tous <- donnees_select|>
     by = "Patient_ID")|>
   left_join(cart, by="Patient_ID")
 
-
+# verif
 nrow(donnees_select)
 sum(complete.cases(donnees_select))
 
@@ -71,49 +77,12 @@ ggsave("33-km2-clin.png", g1)
     scale_fill_manual(values = variee) +
     theme_minimal()
   ggsave("33-cart-hab.png", g5)
-  
- r<-groupes_tous |> group_by(grp_km6_cli) |> summarise(
-   moyenne_bmi = mean(BMI),
-   moyenne_hb = mean(HbA1c),
-   moyenne_glucose = mean(Blood_Glucose)
- )
-  
+
  
  ###############
  #    ARI      #
  ###############
- # Calculons l'indice de Rand ajusté (ARI) (sans d'autres dépendances)
- # L'ARI mesure l'accord entre deux partitions en corrigeant la part d'accord 
- # attendue par hasard.
- 
- calculer_ARI <- function(partition_1, partition_2) {
-   tableau <- table(partition_1, partition_2)
-   choisir_deux <- function(x) x * (x - 1) / 2
-   accords_paires <- sum(choisir_deux(tableau))
-   sommes_lignes <- sum(choisir_deux(rowSums(tableau)))
-   sommes_colonnes <- sum(choisir_deux(colSums(tableau)))
-   total_paires <- choisir_deux(sum(tableau))
-   accord_attendu <- sommes_lignes * sommes_colonnes / total_paires
-   accord_maximal <- (sommes_lignes + sommes_colonnes) / 2
-   denominateur <- accord_maximal - accord_attendu
-   if (denominateur == 0) return(NA_real_)
-   (accords_paires - accord_attendu) / denominateur
- }
- 
- 
- 
- # Croiser les groupes cliniques et les groupes d'habitudes de vie.
- # Les numéros des groupes sont des identifiants et ne correspondent pas
- # nécessairement les uns aux autres.
- tableau_croise <- table(
-   Groupe_clinique = groupes_tous$grp_km6_cli,
-   Groupe_habitudes = groupes_tous$grp_km_hab
- )
- cat("\nTableau croisé des deux segmentations :\n")
- print(tableau_croise)
- 
- # Calculer l'ARI entre les deux segmentations, qui résume leur concordance.
- ari <- calculer_ARI(groupes_tous$grp_km6_cli, groupes_tous$grp_km_hab)
- cat("\nIndice de Rand ajusté (ARI) entre les segmentations :", round(ari, 5), "\n")
 
- ari  
+ ARI(groupes_tous$grp_km6_cli, groupes_tous$grp_km_hab)
+ ARI(groupes_tous$grp_km2_cli, groupes_tous$grp_km_hab)
+ ARI(groupes_tous$gr_CART_hab[!is.na(groupes_tous$gr_CART_hab)], groupes_tous$gr_CART_clin[!is.na(groupes_tous$gr_CART_hab)])
