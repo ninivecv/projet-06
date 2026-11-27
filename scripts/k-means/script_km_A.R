@@ -60,6 +60,10 @@ modeles <- lapply(K_candidats, function(K) {
 
 W <- vapply(modeles, function(m) m$tot.withinss, numeric(1))
 
+# Avertissement : On sait que le calcul de la silhouette utilise les distances 
+# entre les observations. Avec un grand jeu de données, la matrice de distances 
+# peut demander beaucoup de mémoire et de temps de calcul.
+
 silhouettes <- vapply(seq_along(modeles), function(j) {
   if (K_candidats[j] == 1L) return(NA_real_)
   mean(cluster::silhouette(modeles[[j]]$cluster, dist(z))[, "sil_width"])
@@ -113,12 +117,20 @@ barplot(table(nb$Best.nc[1, ]),
 km <- kmeans(z, centers = k_souhaite, nstart = 50, iter.max = 1000,
              algorithm = "Lloyd")
 
+# Précision :km et km6 sont deux ajustements indépendants avec k = 6.
+# Puisque k-means dépend de ses centres initiaux, leurs groupes peuvent différer,
+# même avec la même valeur de k et la même graine fixée au début du script.
+
 km2 <- kmeans(z, centers = 2, nstart = 50, iter.max = 1000,
              algorithm = "Lloyd")
 km6 <- kmeans(z, centers = 6, nstart = 50, iter.max = 1000,
              algorithm = "Lloyd")
 
 ## Numéroter les groupes selon la moyenne du 1er facteur -
+# Attention : ordre est recalculé pour chaque modèle.
+# Pour réordonner ensuite les centres d'un modèle, il faut garder
+# l'ordre correspondant à ce modèle (sinon les centres et les groupes
+# affichés risquent de ne pas correspondre).
 
 ordre <- order(km$centers[, facteurs_A[1]])
 groupes  <- match(km$cluster, ordre)

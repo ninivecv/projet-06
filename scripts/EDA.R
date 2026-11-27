@@ -13,9 +13,11 @@ library(gridExtra)
 enregistrer_tableau_png <- function(tableau, nom_fichier) {
   tableau <- as.data.frame(tableau)
   hauteur <- max(800, 45 * (nrow(tableau) + 2)) # s'adapte au nombre de lignes pour garder le texte lisible
+  dossier <- file.path("resultats", "EDA")
+  dir.create(dossier, recursive = TRUE, showWarnings = FALSE)
 
   png(
-    filename = file.path("resultats", "EDA", nom_fichier),
+    filename = file.path(dossier, nom_fichier),
     width = 2400,
     height = hauteur,
     res = 180
