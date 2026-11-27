@@ -59,6 +59,10 @@ donnees <- data.frame(
                            levels = c("Low", "Moderate", "High"))
 )
 
+# Précision : Le codage numérique de Smoking_Status impose l'ordre Never < Former < Current.
+# Comme ces catégories sont nominales, cet ordre n'est pas vraiment pertinent.
+# Il peut donc influencer les seuils de séparation de l'arbre.
+
 variables_cliniques <- c("IMC", "HbA1c", "Glycemie")
 variables_habitudes <- c("Alim", "Activite", "Tabac")
 

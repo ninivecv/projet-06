@@ -21,7 +21,7 @@ set.seed(2200)        # reproductibilité (l'algorithme a une part d'aléatoire)
 
 ## 1a. Charger la base de données "donnees" :
 
-donnees <- read.csv("diabetes_risk.csv")
+donnees <- read.csv("./data/raw/diabetes_risk.csv")
 
 ## 1b. Les 3 facteurs du groupe B :
 
