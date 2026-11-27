@@ -6,7 +6,7 @@ library(dplyr)
 library(tidyr)   
 library(ggplot2) 
 library(gridExtra)
-
+source("./scripts/utilitaire.R")
 
 # On veut enregistrer un tableau comme image PNG dans le dossier resultats 
 
@@ -121,6 +121,18 @@ effectifs_risque <- as.data.frame(
 )
 names(effectifs_risque) <- c("Catégorie de risque", "Effectif")
 effectifs_risque
+
+
+bar_effectifs <- effectifs_risque |>
+  ggplot() +
+  geom_col(aes(x=`Catégorie de risque`, y=Effectif, fill = `Catégorie de risque`))+
+  scale_fill_manual(values = suite_orange) + 
+  guides (fill = "none")+ 
+  scale_x_discrete(labels = c(Low = "Faible", Moderate = "Modéré", High = "Élevé")) +
+  labs (title = "Effectifs des catégories de risque de diabète") +theme_minimal()
+ggsave("bar_effectifs.png", bar_effectifs)
+
+
 enregistrer_tableau_png(effectifs_risque, "effectifs_par_risque.png")
 
 # Pour chacune des habitudes, on affiche les réponses distinctes observées
@@ -217,6 +229,7 @@ graphique_clinique <- ggplot(
     color = "black"
   ) + guides (fill = "none")
 graphique_clinique
+ggsave("graphique_clinique.png")
 
 
 # Graphique des habitudes de vie 
@@ -238,16 +251,16 @@ habitudes_proportions <- donnees_eda %>%
 # Les barres à 100 % montrent la composition des réponses pour chaque habitude
 # dans les catégories Low, Moderate et High.
 graphique_habitudes <- ggplot(
-  habitudes_proportions,
-  aes(x = Diabetes_Risk, y = Proportion, fill = Reponse)
+  new,
+  aes(x = Diabetes_Risk, y = Proportion, fill = factor(Reponse, levels=ordre))
 ) +
   geom_col() +
   scale_fill_discrete(
     breaks = c(
       "Poor", "Average", "Healthy", # Qualité alimentaire
-      "Low", "Moderate", "High",  # Activité physique
-      "Never", "Former", "Current",  # Tabagisme
-      "Non renseigné"
+      "Low", "Moderate", "High",  "Non renseigné", # Activité physique
+      "Never", "Former", "Current"  # Tabagisme
+      
     ),
     labels = c(
       "Poor" = "Faible (alimentation)",
@@ -279,8 +292,25 @@ graphique_habitudes <- ggplot(
     y = "Pourcentage",
     fill = "Réponse"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  scale_fill_manual (values= c(suite_bleu, suite_bleu_gris, suite_bleu), labels = c(
+    "Poor" = "Faible (alimentation)",
+    "Average" = "Moyenne (alimentation)",
+    "Healthy" = "Saine (alimentation)",
+    "Low" = "Faible (activité)",
+    "Moderate" = "Modérée (activité)",
+    "High" = "Élevée (activité)",
+    "Never" = "Jamais (tabac)",
+    "Former" = "Ancien (tabac)",
+    "Current" = "Actuel (tabac)",
+    "Non renseigné" = "Non renseigné"
+  ),     breaks = c(
+    "Poor", "Average", "Healthy", # Qualité alimentaire
+    "Low", "Moderate", "High", "Non renseigné", # Activité physique
+    "Current", "Former","Never"   # Tabagisme
+  ))
 graphique_habitudes
+ggsave("graphique_habitudes.png", graphique_habitudes)
 
 
 
